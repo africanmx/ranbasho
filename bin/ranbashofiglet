@@ -1,0 +1,94 @@
+#!/bin/bash
+##
+## Copyright 2019 Luis_Pulido_Diaz
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),      ##
+## to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,      ##
+## and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:              ##
+##                                                                                                                                                         ##
+## The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.                          ##
+##                                                                                                                                                         ##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,     ##
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER      ##
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS    ##
+## IN THE SOFTWARE.
+##
+PROGRAM_NAME="ranbashofiglet"
+PROGRAM_VERSION="0.1"
+## Replace the > in the CONSOLE_THINGY
+## with your own string like ~$ or ~#
+## or whatever need. Leave a space for
+## better esthetics in the console.
+CONSOLE_THINGY="> "
+ranbashofiglet(){
+	case "$1" in
+		--version) echo "$PROGRAM_VERSION"; ;;
+		--help)
+			cat <<EOF
+
+$PROGRAM_NAME
+   Version $PROGRAM_VERSION
+
+usage:
+	ranbashofiglet					Replace this with your stuff
+	ranbashofiglet --version 		Shows ranbashofiglet version.
+	ranbashofiglet --help 			Shows this screen.
+EOF
+	;;
+	*)
+		run "$@"
+	;;
+	esac
+}
+try_to_install_figlet(){
+	echo "Figlet program is not installed"
+	read -p "Install now? y/n "
+	case "$REPLY" in
+		Y|y|yes|YES|Yes)
+			test -x $(command -v snap) && snap install --edge figlet && return
+			test -x $(command -v sudo) && sudo apt update && sudo apt install -y figlet && return
+			apt update && apt install -y figlet && return
+			echo "Sorry. We could not install figlet. Try manually" >&2
+			exit
+		;;
+		*)
+			echo "Ok, bye"
+			exit
+		;;
+	esac
+}
+try_to_install_wget(){
+	echo "Wget program in not installed"
+	read -p "Install now? y/n "
+	case "$REPLY" in
+		Y|y|yes|YES|Yes)
+			sudo apt update && sudo apt install wget && return
+		;;
+		*)
+			echo "Ok, bye"
+			exit
+		;;
+	esac
+}
+try_to_install_ranbasho(){
+	URL="https://raw.githubusercontent.com/africanmx/ranbasho/master/bin/ranbasho"
+	DIRECTORY="$(dirname $0)"
+	test -x "$(command -v wget)" || try_to_install_wget
+	(
+		cd "$DIRECTORY"
+		sudo wget "$URL"
+		sudo chmod +x ranbasho
+	)
+	echo "Program ranbasho is available now"
+}
+run(){
+	test -x "$(command -v figlet)" && continue || try_to_install_figlet
+	test -x "$(command -v ranbasho)" && continue || try_to_install_ranbasho
+	test -x "$(command -v lolcat)" && L=1 || continue
+	while true; do
+		clear
+		test -n $L && figlet -c "$(ranbasho)" | lolcat || figlet -c "$(ranbasho)"
+		sleep 2
+	done
+}
+ranbashofiglet "$@"
